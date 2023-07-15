@@ -119,7 +119,7 @@ class HTTPClientImpl: HTTPClient {
             "Cookie",
             cookies.map { "${it.name}=${it.value}" }.joinToString("; ")
         )
-//        connection.setRequestProperty("User-Agent", Configuration.Scraping.userAgent)
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12; Pixel 7 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.57 Mobile Safari/537.36")
         connection.requestMethod = httpMethod
         connection.instanceFollowRedirects = false
         if (httpMethod == "POST") {

@@ -1,7 +1,5 @@
 package app.titech.titechPortalCore.http
 
-import java.net.HttpCookie
-
 interface HTTPRequest {
     val baseURL: String
     val httpMethod: String
