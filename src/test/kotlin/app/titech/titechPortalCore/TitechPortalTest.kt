@@ -82,7 +82,7 @@ class TitechPortalTest {
     }
 
     @Test
-    fun login() {
+    fun loginToProdServer() {
         TitechPortal.changeToMock()
         val portal = TitechPortal()
 
@@ -91,7 +91,78 @@ class TitechPortalTest {
                 TitechPortalAccount(
                     "00B00000",
                     "passw0rd&",
-                    TitechPortalMatrix.entries.associateWith { "A" }
+                    mapOf(
+                        TitechPortalMatrix.A1 to "A",
+                        TitechPortalMatrix.A2 to "A",
+                        TitechPortalMatrix.A3 to "A",
+                        TitechPortalMatrix.A4 to "A",
+                        TitechPortalMatrix.A5 to "A",
+                        TitechPortalMatrix.A6 to "A",
+                        TitechPortalMatrix.A7 to "A",
+                        TitechPortalMatrix.B1 to "A",
+                        TitechPortalMatrix.B2 to "A",
+                        TitechPortalMatrix.B3 to "A",
+                        TitechPortalMatrix.B4 to "A",
+                        TitechPortalMatrix.B5 to "A",
+                        TitechPortalMatrix.B6 to "A",
+                        TitechPortalMatrix.B7 to "A",
+                        TitechPortalMatrix.C1 to "A",
+                        TitechPortalMatrix.C2 to "A",
+                        TitechPortalMatrix.C3 to "A",
+                        TitechPortalMatrix.C4 to "A",
+                        TitechPortalMatrix.C5 to "A",
+                        TitechPortalMatrix.C6 to "A",
+                        TitechPortalMatrix.C7 to "A",
+                        TitechPortalMatrix.D1 to "A",
+                        TitechPortalMatrix.D2 to "A",
+                        TitechPortalMatrix.D3 to "A",
+                        TitechPortalMatrix.D4 to "A",
+                        TitechPortalMatrix.D5 to "A",
+                        TitechPortalMatrix.D6 to "A",
+                        TitechPortalMatrix.D7 to "A",
+                        TitechPortalMatrix.E1 to "A",
+                        TitechPortalMatrix.E2 to "A",
+                        TitechPortalMatrix.E3 to "A",
+                        TitechPortalMatrix.E4 to "A",
+                        TitechPortalMatrix.E5 to "A",
+                        TitechPortalMatrix.E6 to "A",
+                        TitechPortalMatrix.E7 to "A",
+                        TitechPortalMatrix.F1 to "A",
+                        TitechPortalMatrix.F2 to "A",
+                        TitechPortalMatrix.F3 to "A",
+                        TitechPortalMatrix.F4 to "A",
+                        TitechPortalMatrix.F5 to "A",
+                        TitechPortalMatrix.F6 to "A",
+                        TitechPortalMatrix.F7 to "A",
+                        TitechPortalMatrix.G1 to "A",
+                        TitechPortalMatrix.G2 to "A",
+                        TitechPortalMatrix.G3 to "A",
+                        TitechPortalMatrix.G4 to "A",
+                        TitechPortalMatrix.G5 to "A",
+                        TitechPortalMatrix.G6 to "A",
+                        TitechPortalMatrix.G7 to "A",
+                        TitechPortalMatrix.H1 to "A",
+                        TitechPortalMatrix.H2 to "A",
+                        TitechPortalMatrix.H3 to "A",
+                        TitechPortalMatrix.H4 to "A",
+                        TitechPortalMatrix.H5 to "A",
+                        TitechPortalMatrix.H6 to "A",
+                        TitechPortalMatrix.H7 to "A",
+                        TitechPortalMatrix.I1 to "A",
+                        TitechPortalMatrix.I2 to "A",
+                        TitechPortalMatrix.I3 to "A",
+                        TitechPortalMatrix.I4 to "A",
+                        TitechPortalMatrix.I5 to "A",
+                        TitechPortalMatrix.I6 to "A",
+                        TitechPortalMatrix.I7 to "A",
+                        TitechPortalMatrix.J1 to "A",
+                        TitechPortalMatrix.J2 to "A",
+                        TitechPortalMatrix.J3 to "A",
+                        TitechPortalMatrix.J4 to "A",
+                        TitechPortalMatrix.J5 to "A",
+                        TitechPortalMatrix.J6 to "A",
+                        TitechPortalMatrix.J7 to "A"
+                    )
                 )
             )
         }
