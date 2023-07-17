@@ -42,9 +42,11 @@ class HTTPClientImpl: HTTPClient {
             println("responseHeaders: " + connection.headerFields.toString())
             println("responseCode: " + connection.responseCode.toString())
 
-            connection.headerFields["Set-cookie"]
-                ?.flatMap {
+            val setCookie = connection.headerFields["Set-Cookie"] ?: connection.headerFields["Set-cookie"]
+            setCookie?.flatMap {
                     HttpCookie.parse(it)
+                }?.filter {
+                    !it.hasExpired()
                 }?.forEach { cookie ->
                     // FIXME: n^2
                     if (cookie.domain == null) {
@@ -60,7 +62,7 @@ class HTTPClientImpl: HTTPClient {
 
             var needRedirect = false
             if (connection.responseCode in 300..399) {
-                val location = connection.getHeaderField("location")
+                val location = connection.getHeaderField("Location") ?: connection.getHeaderField("location")
                 try {
                     val locationURL = when {
                         location.startsWith("?") -> URL(url.protocol + "://" + url.host + url.path + location)
