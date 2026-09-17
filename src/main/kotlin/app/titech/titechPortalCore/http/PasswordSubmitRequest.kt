@@ -12,7 +12,6 @@ class PasswordSubmitRequest(
     override val queryParameters: Map<String, Any>? = null
     override val headerFields: Map<String, String>? = mapOf(
         "Referer" to BaseURL.origin + "/GetAccess/Login?Template=userpass_key&AUTHMETHOD=UserPassword",
-        "Host" to BaseURL.host,
         "Origin" to BaseURL.origin,
         "Content-Type" to "application/x-www-form-urlencoded",
         "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
