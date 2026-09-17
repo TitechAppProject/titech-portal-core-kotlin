@@ -13,7 +13,7 @@ import java.net.URLEncoder
 class HTTPClientImpl: HTTPClient {
     override var cookies = mutableSetOf<HttpCookie>()
 
-    override suspend fun send(request: HTTPRequest): String = withContext(Dispatchers.IO) {
+    override suspend fun send(request: HTTPRequest): HTTPResponse = withContext(Dispatchers.IO) {
         var urlString = request.baseURL + request.path
         request.queryParameters?.run {
             urlString += "?" + this.map { "${it.key}=${it.value}" }.joinToString("&")
@@ -89,7 +89,7 @@ class HTTPClientImpl: HTTPClient {
         br.close()
         connection.inputStream.close()
 
-        sb.toString()
+        HTTPResponse(sb.toString(), connection.url)
     }
 
     override suspend fun statusCode(request: HTTPRequest, cookies: Set<HttpCookie>): Int = withContext(Dispatchers.IO) {
