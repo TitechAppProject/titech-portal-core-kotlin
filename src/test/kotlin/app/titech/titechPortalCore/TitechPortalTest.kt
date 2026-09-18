@@ -82,6 +82,24 @@ class TitechPortalTest {
     }
 
     @Test
+    fun testPasswordChangePageValidation() {
+        val portal = TitechPortal()
+
+        val html = TitechPortalTest::class.java.getResource("/html/password_change_page.html")!!.readText()
+
+        assertTrue { portal.validatePasswordChangePage(html) }
+    }
+
+    @Test
+    fun testPasswordChangePageValidationForResourceListPage() {
+        val portal = TitechPortal()
+
+        val html = TitechPortalTest::class.java.getResource("/html/resource_list_page-ja.html")!!.readText()
+
+        assertFalse { portal.validatePasswordChangePage(html) }
+    }
+
+    @Test
     fun loginToProdServer() {
         TitechPortal.changeToMock()
         val portal = TitechPortal()
