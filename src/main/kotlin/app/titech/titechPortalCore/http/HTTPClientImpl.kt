@@ -18,9 +18,9 @@ class HTTPClientImpl: HTTPClient {
         request.queryParameters?.run {
             urlString += "?" + this.map { "${it.key}=${it.value}" }.joinToString("&")
         }
-        val url = URL(urlString)
+        var currentURL = URL(urlString)
 
-        var connection = generateUrlConnection(url, request.httpMethod, request.headerFields, cookies)
+        var connection = generateUrlConnection(currentURL, request.httpMethod, request.headerFields, cookies)
 
         do {
             println("RequestURL: " + connection.url.toString())
@@ -65,12 +65,13 @@ class HTTPClientImpl: HTTPClient {
                 val location = connection.getHeaderField("Location") ?: connection.getHeaderField("location")
                 try {
                     val locationURL = when {
-                        location.startsWith("?") -> URL(url.protocol + "://" + url.host + url.path + location)
-                        location.startsWith("/") -> URL(url.protocol + "://" + url.host + location)
+                        location.startsWith("?") -> URL(currentURL.protocol + "://" + currentURL.authority + currentURL.path + location)
+                        location.startsWith("/") -> URL(currentURL.protocol + "://" + currentURL.authority + location)
                         else -> URL(location)
                     }
                     connection =
                         generateUrlConnection(locationURL, "GET", request.headerFields, cookies)
+                    currentURL = locationURL
                     needRedirect = true
                 } catch (e: Exception) {
                     needRedirect = false
