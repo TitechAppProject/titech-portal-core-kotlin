@@ -5,6 +5,7 @@ import app.titech.titechPortalCore.`object`.*
 import org.jsoup.Jsoup
 import java.lang.Exception
 import java.net.HttpCookie
+import java.net.URL
 
 class TitechPortalLoginPasswordPageValidationError : Exception()
 class TitechPortalLoginAlreadyLoggedinError : Exception()
@@ -19,7 +20,8 @@ class TitechPortal(
     /// - Parameter account: ログイン情報
     suspend fun login(account: TitechPortalAccount): List<HttpCookie> {
         /// パスワードページの取得
-        val passwordPageHtml = fetchPasswordPage()
+        val passwordPageResponse = fetchPasswordPage()
+        val passwordPageHtml = passwordPageResponse.body
         /// パスワードページのバリデーション
         val validatePasswordPageResult = validatePasswordPage(passwordPageHtml)
         if (!validatePasswordPageResult) {
@@ -28,12 +30,13 @@ class TitechPortal(
         /// パスワードページのInputsのパース
         val passwordPageInputs = parseHTMLInput(passwordPageHtml)
         /// パスワードFormの送信
-        val passwordPageSubmitHtml = submitPassword(passwordPageInputs, account.username, account.password)
+        val passwordPageSubmitResponse = submitPassword(passwordPageInputs, account.username, account.password)
+        val passwordPageSubmitHtml = passwordPageSubmitResponse.body
         /// すでにログインセッションがある場合はパスワード入力後にすぐにResourceListページに飛ぶ
         if (validateResourceListPage(passwordPageSubmitHtml)) {
             throw TitechPortalLoginAlreadyLoggedinError()
         }
-        val matrixcodePageHtml: String = if (validateOtpPage(passwordPageSubmitHtml)) {
+        val matrixcodePageResponse: HTTPResponse = if (validateOtpPage(passwordPageSubmitHtml)) {
             /// OTP選択ページのInputsのパース
             val otpSelectPageInputs = parseHTMLInput(passwordPageSubmitHtml)
             /// OTP選択ページのSelectのパース
@@ -47,10 +50,11 @@ class TitechPortal(
                 throw TitechPortalLoginNoMatrixcodeOptionError()
             }
             /// OTP選択Formの送信
-            submitOtpSelect(otpSelectPageInputs, otpSelectPageSelects)
+            submitOtpSelect(otpSelectPageInputs, otpSelectPageSelects, passwordPageSubmitResponse.url)
         } else {
-            passwordPageSubmitHtml
+            HTTPResponse(passwordPageSubmitHtml, passwordPageSubmitResponse.url)
         }
+        val matrixcodePageHtml = matrixcodePageResponse.body
         /// マトリクスコードページのバリデーション
         if (!validateMatrixcodePage(matrixcodePageHtml)) {
             throw TitechPortalLoginMatrixcodePageValidationError()
@@ -62,7 +66,8 @@ class TitechPortal(
         ///マトリクスコード入力ページのSelectのパース
         val matrixcodePageSelects = parseHTMLSelect(matrixcodePageHtml)
         /// マトリクスコードFormの送信
-        val matrixcodePageSubmitHtml = submitMatrixcode(matrixcodePageInputs, matrixcodePageSelects, matrixcodePageCurrentMatrix, account.matrixcode)
+        val matrixcodePageSubmitResponse = submitMatrixcode(matrixcodePageInputs, matrixcodePageSelects, matrixcodePageCurrentMatrix, account.matrixcode, matrixcodePageResponse.url)
+        val matrixcodePageSubmitHtml = matrixcodePageSubmitResponse.body
         /// リソースリストページのバリデーション
         if (!validateResourceListPage(matrixcodePageSubmitHtml)) {
             throw TitechPortalLoginResourceListPageValidationError(matrixcodePageCurrentMatrix)
@@ -78,7 +83,8 @@ class TitechPortal(
     /// - Returns: 正しくログインできればtrue, エラーであればfalseを返す
     suspend fun checkUsernamePassword(username: String, password: String): Boolean {
         /// パスワードページの取得
-        val passwordPageHtml = fetchPasswordPage()
+        val passwordPageResponse = fetchPasswordPage()
+        val passwordPageHtml = passwordPageResponse.body
         /// パスワードページのバリデーション
         val validatePasswordPageResult = validatePasswordPage(passwordPageHtml)
         if (!validatePasswordPageResult) {
@@ -87,7 +93,8 @@ class TitechPortal(
         /// パスワードページのInputsのパース
         val passwordPageInputs = parseHTMLInput(passwordPageHtml)
         /// パスワードFormの送信
-        val passwordPageSubmitHtml = submitPassword(passwordPageInputs, username, password)
+        val passwordPageSubmitResponse = submitPassword(passwordPageInputs, username, password)
+        val passwordPageSubmitHtml = passwordPageSubmitResponse.body
 
         return validateOtpPage(passwordPageSubmitHtml) || validateMatrixcodePage(passwordPageSubmitHtml)
     }
@@ -105,7 +112,8 @@ class TitechPortal(
     /// - Returns: 現在のマトリクス
     suspend fun fetchCurrentMatrix(username: String, password: String): List<TitechPortalMatrix> {
         /// パスワードページの取得
-        val passwordPageHtml = fetchPasswordPage()
+        val passwordPageResponse = fetchPasswordPage()
+        val passwordPageHtml = passwordPageResponse.body
         /// パスワードページのバリデーション
         val validatePasswordPageResult = validatePasswordPage(passwordPageHtml)
         if (!validatePasswordPageResult) {
@@ -114,12 +122,13 @@ class TitechPortal(
         /// パスワードページのInputsのパース
         val passwordPageInputs = parseHTMLInput(passwordPageHtml)
         /// パスワードFormの送信
-        val passwordPageSubmitHtml = submitPassword(passwordPageInputs, username, password)
+        val passwordPageSubmitResponse = submitPassword(passwordPageInputs, username, password)
+        val passwordPageSubmitHtml = passwordPageSubmitResponse.body
         /// すでにログインセッションがある場合はパスワード入力後にすぐにResourceListページに飛ぶ
         if (validateResourceListPage(passwordPageSubmitHtml)) {
             throw TitechPortalLoginAlreadyLoggedinError()
         }
-        val matrixcodePageHtml: String = if (validateOtpPage(passwordPageSubmitHtml)) {
+        val matrixcodePageResponse: HTTPResponse = if (validateOtpPage(passwordPageSubmitHtml)) {
             /// OTP選択ページのInputsのパース
             val otpSelectPageInputs = parseHTMLInput(passwordPageSubmitHtml)
             /// OTP選択ページのSelectのパース
@@ -133,10 +142,11 @@ class TitechPortal(
                 throw TitechPortalLoginNoMatrixcodeOptionError()
             }
             /// OTP選択Formの送信
-            submitOtpSelect(otpSelectPageInputs, otpSelectPageSelects)
+            submitOtpSelect(otpSelectPageInputs, otpSelectPageSelects, passwordPageSubmitResponse.url)
         } else {
-            passwordPageSubmitHtml
+            HTTPResponse(passwordPageSubmitHtml, passwordPageSubmitResponse.url)
         }
+        val matrixcodePageHtml = matrixcodePageResponse.body
         /// マトリクスコードページのバリデーション
         if (!validateMatrixcodePage(matrixcodePageHtml)) {
             throw TitechPortalLoginMatrixcodePageValidationError()
@@ -145,7 +155,7 @@ class TitechPortal(
         return parseCurrentMatrixes(matrixcodePageHtml)
     }
 
-    private suspend fun fetchPasswordPage(): String  = httpClient.send(PasswordPageRequest())
+    private suspend fun fetchPasswordPage(): HTTPResponse = httpClient.send(PasswordPageRequest())
 
     internal fun validatePasswordPage(html: String): Boolean {
         val bodyHTML = Jsoup.parse(html).body().html()
@@ -153,7 +163,7 @@ class TitechPortal(
         return bodyHTML.contains("Please input your account &amp; password.")
     }
 
-    private suspend fun submitPassword(htmlInputs: List<HTMLInput>, username: String, password: String): String {
+    private suspend fun submitPassword(htmlInputs: List<HTMLInput>, username: String, password: String): HTTPResponse {
         val injectedHtmlInputs = inject(htmlInputs, username, password)
 
         val request = PasswordSubmitRequest(injectedHtmlInputs)
@@ -167,17 +177,17 @@ class TitechPortal(
         return bodyHTML.contains("Select Label for OTP") || bodyHTML.contains("Enter Token Dynamic Password")
     }
 
-    private suspend fun submitOtpSelect(htmlInputs: List<HTMLInput>, htmlSelects: List<HTMLSelect>): String {
+    private suspend fun submitOtpSelect(htmlInputs: List<HTMLInput>, htmlSelects: List<HTMLSelect>, referer: URL?): HTTPResponse {
         val selectedHtmlSelects = htmlSelects.map {
             it.select("GridAuthOption")
         }
 
-        val request = OtpSelectSubmitRequest(htmlInputs, selectedHtmlSelects)
+        val request = OtpSelectSubmitRequest(htmlInputs, selectedHtmlSelects, referer)
 
         return httpClient.send(request)
     }
 
-    private suspend fun submitMatrixcode(htmlInputs: List<HTMLInput>, htmlSelects: List<HTMLSelect>, parsedMatrix: List<TitechPortalMatrix>, matrixcodes: Map<TitechPortalMatrix, String>): String {
+    private suspend fun submitMatrixcode(htmlInputs: List<HTMLInput>, htmlSelects: List<HTMLSelect>, parsedMatrix: List<TitechPortalMatrix>, matrixcodes: Map<TitechPortalMatrix, String>, referer: URL?): HTTPResponse {
         val injectedHtmlInputs = inject(htmlInputs, parsedMatrix, matrixcodes)
 
         val injectedSelects = htmlSelects.map {
@@ -188,7 +198,7 @@ class TitechPortal(
             }
         }
 
-        val request = MatrixcodeSubmitRequest(injectedHtmlInputs, injectedSelects)
+        val request = MatrixcodeSubmitRequest(injectedHtmlInputs, injectedSelects, referer)
 
         return httpClient.send(request)
     }

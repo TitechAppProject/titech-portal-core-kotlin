@@ -13,14 +13,14 @@ import java.net.URLEncoder
 class HTTPClientImpl: HTTPClient {
     override var cookies = mutableSetOf<HttpCookie>()
 
-    override suspend fun send(request: HTTPRequest): String = withContext(Dispatchers.IO) {
+    override suspend fun send(request: HTTPRequest): HTTPResponse = withContext(Dispatchers.IO) {
         var urlString = request.baseURL + request.path
         request.queryParameters?.run {
             urlString += "?" + this.map { "${it.key}=${it.value}" }.joinToString("&")
         }
-        val url = URL(urlString)
+        var currentURL = URL(urlString)
 
-        var connection = generateUrlConnection(url, request.httpMethod, request.headerFields, cookies)
+        var connection = generateUrlConnection(currentURL, request.httpMethod, request.headerFields, cookies)
 
         do {
             println("RequestURL: " + connection.url.toString())
@@ -65,12 +65,13 @@ class HTTPClientImpl: HTTPClient {
                 val location = connection.getHeaderField("Location") ?: connection.getHeaderField("location")
                 try {
                     val locationURL = when {
-                        location.startsWith("?") -> URL(url.protocol + "://" + url.host + url.path + location)
-                        location.startsWith("/") -> URL(url.protocol + "://" + url.host + location)
+                        location.startsWith("?") -> URL(currentURL.protocol + "://" + currentURL.authority + currentURL.path + location)
+                        location.startsWith("/") -> URL(currentURL.protocol + "://" + currentURL.authority + location)
                         else -> URL(location)
                     }
                     connection =
                         generateUrlConnection(locationURL, "GET", request.headerFields, cookies)
+                    currentURL = locationURL
                     needRedirect = true
                 } catch (e: Exception) {
                     needRedirect = false
@@ -89,7 +90,7 @@ class HTTPClientImpl: HTTPClient {
         br.close()
         connection.inputStream.close()
 
-        sb.toString()
+        HTTPResponse(sb.toString(), connection.url)
     }
 
     override suspend fun statusCode(request: HTTPRequest, cookies: Set<HttpCookie>): Int = withContext(Dispatchers.IO) {
