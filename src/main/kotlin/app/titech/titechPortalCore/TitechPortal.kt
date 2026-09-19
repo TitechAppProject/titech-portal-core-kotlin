@@ -12,6 +12,7 @@ class TitechPortalLoginAlreadyLoggedinError : Exception()
 class TitechPortalLoginNoMatrixcodeOptionError : Exception()
 class TitechPortalLoginMatrixcodePageValidationError : Exception()
 class TitechPortalLoginResourceListPageValidationError(val currentMatrixs: List<TitechPortalMatrix>) : Exception()
+class TitechPortalLoginPasswordChangeRequiredError(val url: URL?) : Exception()
 
 class TitechPortal(
     val httpClient: HTTPClient = HTTPClientImpl()
@@ -68,6 +69,10 @@ class TitechPortal(
         /// マトリクスコードFormの送信
         val matrixcodePageSubmitResponse = submitMatrixcode(matrixcodePageInputs, matrixcodePageSelects, matrixcodePageCurrentMatrix, account.matrixcode, matrixcodePageResponse.url)
         val matrixcodePageSubmitHtml = matrixcodePageSubmitResponse.body
+        /// パスワード変更ページの検出
+        if (validatePasswordChangePage(matrixcodePageSubmitHtml)) {
+            throw TitechPortalLoginPasswordChangeRequiredError(matrixcodePageSubmitResponse.url)
+        }
         /// リソースリストページのバリデーション
         if (!validateResourceListPage(matrixcodePageSubmitHtml)) {
             throw TitechPortalLoginResourceListPageValidationError(matrixcodePageCurrentMatrix)
@@ -228,6 +233,12 @@ class TitechPortal(
         val title = Jsoup.parse(html).title()
 
         return title.contains("リソース メニュー")
+    }
+
+    internal fun validatePasswordChangePage(html: String): Boolean {
+        val title = Jsoup.parse(html).title()
+
+        return title.contains("Password Change")
     }
 
     internal fun parseHTMLInput(html: String): List<HTMLInput> {
