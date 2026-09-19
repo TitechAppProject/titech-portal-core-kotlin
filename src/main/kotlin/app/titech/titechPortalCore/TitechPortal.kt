@@ -12,7 +12,7 @@ class TitechPortalLoginAlreadyLoggedinError : Exception()
 class TitechPortalLoginNoMatrixcodeOptionError : Exception()
 class TitechPortalLoginMatrixcodePageValidationError : Exception()
 class TitechPortalLoginResourceListPageValidationError(val currentMatrixs: List<TitechPortalMatrix>) : Exception()
-class TitechPortalLoginPasswordChangeRequiredError : Exception()
+class TitechPortalLoginPasswordChangeRequiredError(val url: URL?) : Exception()
 
 class TitechPortal(
     val httpClient: HTTPClient = HTTPClientImpl()
@@ -71,7 +71,7 @@ class TitechPortal(
         val matrixcodePageSubmitHtml = matrixcodePageSubmitResponse.body
         /// パスワード変更ページの検出
         if (validatePasswordChangePage(matrixcodePageSubmitHtml)) {
-            throw TitechPortalLoginPasswordChangeRequiredError()
+            throw TitechPortalLoginPasswordChangeRequiredError(matrixcodePageSubmitResponse.url)
         }
         /// リソースリストページのバリデーション
         if (!validateResourceListPage(matrixcodePageSubmitHtml)) {
